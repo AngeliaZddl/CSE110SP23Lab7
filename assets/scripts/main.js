@@ -58,7 +58,7 @@ function initializeServiceWorker() {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('./sw.js', {
-        scope: './',
+          scope: './',
       });
       console.log('The service worker has been successfully registered with the scope: ${registration.scope}');
       } catch (error) {
@@ -112,6 +112,26 @@ async function getRecipes() {
   //            resolve() method.
   // A10. TODO - Log any errors from catch using console.error
   // A11. TODO - Pass any errors to the Promise's reject() function
+  return new Promise(async (resolve, reject) => {
+    try {
+      const storedRecipes = JSON.parse(localStorage.getItem('recipes'));
+      if (storedRecipes) {
+        resolve(storedRecipes);
+      } else {
+        const recipes = [];
+        for (const url of RECIPE_URLS) {
+          const response = await fetch(url);
+          const recipe = await response.json();
+          recipes.push(recipe);
+        }
+        saveRecipesToStorage(recipes);
+        resolve(recipes);
+      }
+    } catch (error) {
+      console.error(error);
+      reject(error);
+    }
+  });
 }
 
 /**
